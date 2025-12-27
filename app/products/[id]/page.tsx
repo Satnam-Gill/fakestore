@@ -7,11 +7,17 @@ export const revalidate = 3600;
 export async function generateStaticParams() {
   try {
     const products = await getProducts();
+    // Verify we actually got products back
+    if (!Array.isArray(products) || products.length === 0) {
+        console.warn('No products found during SSG generation');
+        return [];
+    }
     return products.map((product) => ({
       id: String(product.id),
     }));
   } catch (error) {
     console.error('Failed to generate static params:', error);
+    // Return empty array so build doesn't fail, but pages will be ISR
     return [];
   }
 }
