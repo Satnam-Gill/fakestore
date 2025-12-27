@@ -5,14 +5,16 @@ const BASE_URL = 'https://fakestoreapi.com';
 
 const api = axios.create({
     baseURL: BASE_URL,
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json',
+    }
 });
 
 export const getProducts = async (
     sort: 'asc' | 'desc' = 'asc',
     limit?: number
 ): Promise<Product[]> => {
-    // FakeStoreAPI doesn't support easy pagination + sort combo in one go perfectly for all fields,
-    // but supports limit and sort.
     const { data } = await api.get('/products', {
         params: {
             sort,
