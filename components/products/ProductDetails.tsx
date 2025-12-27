@@ -11,6 +11,14 @@ interface ProductDetailsProps {
 }
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+    // Handle potential missing data
+    const image = product.image || '/placeholder-image.jpg';
+    const title = product.title || 'Untitled Product';
+    const category = product.category || 'Uncategorized';
+    const price = product.price || 0;
+    const description = product.description || 'No description available.';
+    const rating = product.rating || { rate: 0, count: 0 };
+    
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Button 
@@ -41,9 +49,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         }}>
                              {/* Use regular img if Next Image is tricky with external domains without config */}
                             <img 
-                                src={product.image} 
-                                alt={product.title} 
+                                src={image} 
+                                alt={title} 
                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                                onError={(e) => {
+                                    // Fallback image if the original fails to load
+                                    (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+                                }}
                             />
                         </Box>
                     </motion.div>
@@ -55,24 +67,24 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                        <Chip label={product.category} color="secondary" variant="outlined" sx={{ mb: 2, textTransform: 'capitalize' }} />
+                        <Chip label={category} color="secondary" variant="outlined" sx={{ mb: 2, textTransform: 'capitalize' }} />
                         <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
-                            {product.title}
+                            {title}
                         </Typography>
                         
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <Rating value={product.rating.rate} readOnly precision={0.5} />
+                            <Rating value={rating.rate} readOnly precision={0.5} />
                             <Typography variant="body1" color="text.secondary" sx={{ ml: 1 }}>
-                                ({product.rating.count} reviews)
+                                ({rating.count} reviews)
                             </Typography>
                         </Box>
 
                         <Typography variant="h3" color="primary" fontWeight="bold" gutterBottom>
-                             ${product.price.toFixed(2)}
+                             ${price.toFixed(2)}
                         </Typography>
 
                         <Typography variant="body1" color="text.secondary" paragraph sx={{ mt: 2, lineHeight: 1.8 }}>
-                            {product.description}
+                            {description}
                         </Typography>
 
                         <Button variant="contained" size="large" fullWidth sx={{ mt: 4, py: 1.5 }}>

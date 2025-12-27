@@ -4,18 +4,26 @@ import ProductDetails from '@/components/products/ProductDetails';
 
 export const revalidate = 3600;
 
+export const dynamicParams = true;
+
+
 export async function generateStaticParams() {
   try {
-    const res = await fetch('https://fakestoreapi.com/products');
-    
+    const res = await fetch('https://fakestoreapi.com/products', {
+      next: { revalidate: 3600 }, // IMPORTANT for Vercel
+    });
+
     if (!res.ok) {
-        console.error(`Failed to fetch products: ${res.status} ${res.statusText}`);
-        return [];
+      console.error(
+        `Failed to fetch products: ${res.status} ${res.statusText}`
+      );
+      return [];
     }
 
     const products = await res.json();
-    return products.map((product: any) => ({
-      id: String(product.id),
+
+    return products.map((product: { id: number }) => ({
+      id: product.id.toString(),
     }));
   } catch (error) {
     console.error('Failed to generate static params:', error);
@@ -23,20 +31,22 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    
-    let product = null;
-    try {
-        product = await getProduct(id);
-    } catch (error) {
-        console.error('Error fetching product in component:', error);
-        return notFound();
-    }
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = params;
 
+  try {
+    const product = await getProduct(id);
     if (!product) {
-       return notFound();
+      return notFound();
     }
 
     return <ProductDetails product={product} />;
+  } catch (error) {
+    console.error('Error fetching product in component:', error);
+    return notFound();
+  }
 }

@@ -18,6 +18,13 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 export default function ProductCard({ product }: { product: Product }) {
+    // Handle potential missing data
+    const image = product.image || '/placeholder-image.jpg';
+    const title = product.title || 'Untitled Product';
+    const category = product.category || 'Uncategorized';
+    const price = product.price || 0;
+    const rating = product.rating || { rate: 0, count: 0 };
+    
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -30,8 +37,8 @@ export default function ProductCard({ product }: { product: Product }) {
                     <Box sx={{ position: 'relative', pt: '100%'  }}>
                         <CardMedia
                             component="img"
-                            image={product.image}
-                            alt={product.title}
+                            image={image}
+                            alt={title}
                             sx={{
                                 position: 'absolute',
                                 top: 0,
@@ -41,22 +48,26 @@ export default function ProductCard({ product }: { product: Product }) {
                                 objectFit: 'contain',
                                 p: 2,
                             }}
+                            onError={(e) => {
+                                // Fallback image if the original fails to load
+                                (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+                            }}
                         />
                     </Box>
                     <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography gutterBottom variant="h6" component="div" noWrap sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                            {product.title}
+                            {title}
                         </Typography>
-                        <Chip label={product.category} size="small" color="secondary" variant="outlined" sx={{ alignSelf: 'start', mb: 1 }} />
+                        <Chip label={category} size="small" color="secondary" variant="outlined" sx={{ alignSelf: 'start', mb: 1 }} />
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <Rating value={product.rating.rate} readOnly precision={0.5} size="small" />
+                            <Rating value={rating.rate} readOnly precision={0.5} size="small" />
                             <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                                ({product.rating.count})
+                                ({rating.count})
                             </Typography>
                         </Box>
                         <Box sx={{ mt: 'auto' }}>
                             <Typography variant="h6" color="primary" fontWeight="bold">
-                                ${product.price.toFixed(2)}
+                                ${price.toFixed(2)}
                             </Typography>
                         </Box>
                     </CardContent>
