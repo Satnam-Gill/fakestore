@@ -30,6 +30,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     try {
         product = await getProduct(id);
     } catch (error) {
+        console.error('Error fetching product in component:', error);
         return notFound();
     }
 
