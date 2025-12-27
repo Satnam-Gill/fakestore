@@ -1,25 +1,15 @@
-import { getProduct, getProducts } from '@/lib/api';
+import { getProduct } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import ProductDetails from '@/components/products/ProductDetails';
 
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  try {
-    const products = await getProducts();
-    // Verify we actually got products back
-    if (!Array.isArray(products) || products.length === 0) {
-        console.warn('No products found during SSG generation');
-        return [];
-    }
-    return products.map((product) => ({
-      id: String(product.id),
-    }));
-  } catch (error) {
-    console.error('Failed to generate static params:', error);
-    // Return empty array so build doesn't fail, but pages will be ISR
-    return [];
-  }
+  const products = await fetch('https://fakestoreapi.com/products').then((res) => res.json());
+
+  return products.map((product: any) => ({
+    id: String(product.id),
+  }));
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {

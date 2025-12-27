@@ -1,63 +1,47 @@
+import axios from 'axios';
 import { CreateProductParams, Product } from '@/types';
 
 const BASE_URL = 'https://fakestoreapi.com';
-const HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Accept': 'application/json',
-};
 
-async function fetchJson<T>(url: string, options: RequestInit = {}): Promise<T> {
-    const res = await fetch(`${BASE_URL}${url}`, {
-        ...options,
-        headers: {
-            ...HEADERS,
-            ...options.headers,
-        },
-    });
-    if (!res.ok) {
-        throw new Error(`API request failed with status ${res.status}`);
-    }
-    return res.json();
-}
+const api = axios.create({
+    baseURL: BASE_URL,
+});
 
 export const getProducts = async (
     sort: 'asc' | 'desc' = 'asc',
     limit?: number
 ): Promise<Product[]> => {
-    const query = new URLSearchParams({ sort });
-    if (limit) query.append('limit', limit.toString());
-
-    // next: { revalidate: 3600 } can be added here if we want global caching
-    return fetchJson<Product[]>(`/products?${query.toString()}`);
+    // FakeStoreAPI doesn't support easy pagination + sort combo in one go perfectly for all fields,
+    // but supports limit and sort.
+    const { data } = await api.get('/products', {
+        params: {
+            sort,
+            limit,
+        },
+    });
+    return data;
 };
 
 export const getProductsByCategory = async (category: string, sort: 'asc' | 'desc' = 'asc'): Promise<Product[]> => {
-    const query = new URLSearchParams({ sort });
-    return fetchJson<Product[]>(`/products/category/${category}?${query.toString()}`);
+    const { data } = await api.get(`/products/category/${category}`, {
+        params: { sort },
+    });
+    return data;
 };
 
 export const getProduct = async (id: string): Promise<Product> => {
-    return fetchJson<Product>(`/products/${id}`);
+    const { data } = await api.get(`/products/${id}`);
+    return data;
 };
 
 export const getCategories = async (): Promise<string[]> => {
-    return fetchJson<string[]>('/products/categories');
+    const { data } = await api.get('/products/categories');
+    return data;
 };
 
 export const createProduct = async (product: CreateProductParams): Promise<Product> => {
-    return fetchJson<Product>('/products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(product),
-    });
+    const { data } = await api.post('/products', product);
+    return data;
 };
 
-export default {
-    getProducts,
-    getProduct,
-    getCategories,
-    createProduct,
-    getProductsByCategory
-};
+export default api;
