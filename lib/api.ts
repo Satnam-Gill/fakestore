@@ -4,7 +4,9 @@ const BASE_URL = 'https://fakestoreapi.com';
 
 async function fetcher<T>(url: string, options?: RequestInit): Promise<T> {
     try {
-        const res = await fetch(`${BASE_URL}${url}`, options);
+        const res = await fetch(`${BASE_URL}${url}`, {
+            ...options,
+        });
         if (!res.ok) {
             console.error(`API Error: ${res.status} ${res.statusText} at ${url}`);
             throw new Error(`API Error: ${res.status}`);

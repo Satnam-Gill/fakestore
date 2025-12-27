@@ -10,7 +10,7 @@ import ProductDetails from '@/components/products/ProductDetails';
 export async function generateStaticParams() {
   try {
     const res = await fetch('https://fakestoreapi.com/products', {
-      next: { revalidate: 3600 }, 
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
